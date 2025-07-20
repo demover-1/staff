@@ -120,7 +120,7 @@
 
       function convertDriveUrl(originalUrl) {
         const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
+        return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : "";
       }
 
       fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}&kakutei=${encodeURIComponent(kakutei)}`)
