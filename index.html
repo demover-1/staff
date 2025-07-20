@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スタッフ選択</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .staff-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .staff-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .radio-column {
+      display: flex;
+      align-items: center;
+    }
+
+    .staff-info {
+      flex: 1;
+    }
+
+    .nickname {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 6px;
+    }
+
+    .block-label {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .introduction {
+      font-size: 0.9em;
+      color: #333;
+    }
+
+    button {
+      margin: 30px auto 0;
+      display: block;
+      padding: 12px 24px;
+      font-size: 1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #confirmedStaff {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h2>担当スタッフを選択してください</h2>
+
+  <form id="staffForm" class="staff-list">
+    <!-- スタッフカードはJavaScriptで追加されます -->
+  </form>
+
+  <button type="submit" form="staffForm">スタッフを決定する</button>
+
+  <div id="confirmedStaff"></div> <!-- 確定スタッフの表示エリア -->
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userid = urlParams.get("userid")?.toLowerCase(); // 小文字で取得
+
+    if (!userid) {
+      alert("useridが指定されていません。URLを確認してください。");
+    }
+
+    const webhookURL = "https://hook.us1.make.com/xxxxxx"; // スタッフ取得用Webhook URL
+
+    // スタッフ情報を取得してHTMLに追加
+    fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}`)
+      .then(res => res.json())
+      .then(data => {
+        const staffForm = document.getElementById("staffForm");
+
+        data.staffs.forEach((staff) => {
+          const label = document.createElement("label");
+          label.className = "staff-card";
+
+          label.innerHTML = `
+            <div class="radio-column">
+              <input type="radio" name="staff" value="${staff.nickname}" required>
+            </div>
+            <div class="staff-info">
+              <img src="https://drive.google.com/uc?export=view&id=${staff.photoId}" class="staff-photo" alt="スタッフ写真">
+              <div class="nickname">${staff.ニックネーム}</div>
+              <div class="block-label">得意なイメージ</div>
+              <div>${staff.得意なイメージ}</div>
+              <div class="block-label">得意な技術</div>
+              <div>${staff.得意な技術}</div>
+              <div class="block-label">紹介文</div>
+              <div class="introduction">${staff.紹介文}</div>
+            </div>
+          `;
+
+          staffForm.appendChild(label);
+        });
+      })
+      .catch(err => {
+        console.error("スタッフ情報の取得に失敗しました:", err);
+        alert("スタッフ情報の取得に失敗しました。もう一度お試しください。");
+      });
+
+    // 送信時の処理
+    document.getElementById("staffForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const selected = document.querySelector('input[name="staff"]:checked');
+      if (selected && userid) {
+        const nickname = selected.value;
+
+        const postWebhook = "https://hook.us1.make.com/yyyyyy"; // スタッフ決定通知用Webhook URL
+
+        fetch(postWebhook, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            nickname: nickname,
+            userid: userid
+          })
+        })
+        .then(res => {
+          if (res.ok) {
+            document.getElementById("confirmedStaff").textContent = `確定スタッフ：${nickname}`;
+          } else {
+            alert("送信に失敗しました。");
+          }
+        })
+        .catch(err => {
+          console.error("送信エラー:", err);
+          alert("送信に失敗しました。");
+        });
+
+      } else {
+        alert("スタッフを選択してください。");
+      }
+    });
+  </script>
+</body>
+</html>
