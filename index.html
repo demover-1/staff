@@ -104,7 +104,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const userid = urlParams.get("userid")?.toLowerCase();
+    const userid = urlParams.get("userid");
     const kakutei = urlParams.get("kakutei");
 
     console.log("kakutei:", kakutei); // 確認用ログ
