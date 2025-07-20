@@ -113,94 +113,92 @@
       alert("useridが指定されていません。URLを確認してください。");
     }
 
-    // kakuteiパラメータで分岐制御（任意）
     if (kakutei !== "ssttff") {
       console.log("このページはスタッフ選択モードではありません。");
-      return;
-    }
+    } else {
+      const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
 
-    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
+      function convertDriveUrl(originalUrl) {
+        const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
+      }
 
-    function convertDriveUrl(originalUrl) {
-      const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
-    }
+      fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}&kakutei=${encodeURIComponent(kakutei)}`)
+        .then(res => res.json())
+        .then(data => {
+          const staffForm = document.getElementById("staffForm");
 
-    fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}&kakutei=${encodeURIComponent(kakutei)}`)
-      .then(res => res.json())
-      .then(data => {
-        const staffForm = document.getElementById("staffForm");
+          data.forEach((staff) => {
+            const nickname = staff[2] || "";
+            const intro = staff[6] || "";
+            const imageType = staff[7] || "";
+            const skill = staff[8] || "";
+            const imageUrl = convertDriveUrl(staff[11] || "");
 
-        data.forEach((staff) => {
-          const nickname = staff[2] || "";
-          const intro = staff[6] || "";
-          const imageType = staff[7] || "";
-          const skill = staff[8] || "";
-          const imageUrl = convertDriveUrl(staff[11] || "");
+            const label = document.createElement("label");
+            label.className = "staff-card";
 
-          const label = document.createElement("label");
-          label.className = "staff-card";
+            label.innerHTML = `
+              <div class="radio-column">
+                <input type="radio" name="staff" value="${nickname}" required>
+              </div>
+              <div class="staff-info">
+                <img src="${imageUrl}" class="staff-photo" alt="スタッフ写真">
+                <div class="nickname">${nickname}</div>
+                <div class="block-label">得意なイメージ</div>
+                <div>${imageType}</div>
+                <div class="block-label">得意な技術</div>
+                <div>${skill}</div>
+                <div class="block-label">紹介文</div>
+                <div class="introduction">${intro}</div>
+              </div>
+            `;
 
-          label.innerHTML = `
-            <div class="radio-column">
-              <input type="radio" name="staff" value="${nickname}" required>
-            </div>
-            <div class="staff-info">
-              <img src="${imageUrl}" class="staff-photo" alt="スタッフ写真">
-              <div class="nickname">${nickname}</div>
-              <div class="block-label">得意なイメージ</div>
-              <div>${imageType}</div>
-              <div class="block-label">得意な技術</div>
-              <div>${skill}</div>
-              <div class="block-label">紹介文</div>
-              <div class="introduction">${intro}</div>
-            </div>
-          `;
-
-          staffForm.appendChild(label);
-        });
-      })
-      .catch(err => {
-        console.error("スタッフ情報の取得に失敗しました:", err);
-        alert("スタッフ情報の取得に失敗しました。もう一度お試しください。");
-      });
-
-    document.getElementById("staffForm").addEventListener("submit", function(event) {
-      event.preventDefault();
-
-      const selected = document.querySelector('input[name="staff"]:checked');
-      if (selected && userid) {
-        const nickname = selected.value;
-
-        const postWebhook = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
-
-        fetch(postWebhook, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            nickname: nickname,
-            userid: userid,
-            kakutei: kakutei  // ここに kakutei を追加
-          })
-        })
-        .then(res => {
-          if (res.ok) {
-            document.getElementById("confirmedStaff").textContent = `確定スタッフ：${nickname}`;
-          } else {
-            alert("送信に失敗しました。");
-          }
+            staffForm.appendChild(label);
+          });
         })
         .catch(err => {
-          console.error("送信エラー:", err);
-          alert("送信に失敗しました。");
+          console.error("スタッフ情報の取得に失敗しました:", err);
+          alert("スタッフ情報の取得に失敗しました。もう一度お試しください。");
         });
 
-      } else {
-        alert("スタッフを選択してください。");
-      }
-    });
+      document.getElementById("staffForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const selected = document.querySelector('input[name="staff"]:checked');
+        if (selected && userid) {
+          const nickname = selected.value;
+
+          const postWebhook = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
+
+          fetch(postWebhook, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              nickname: nickname,
+              userid: userid,
+              kakutei: kakutei  // kakuteiも送信
+            })
+          })
+          .then(res => {
+            if (res.ok) {
+              document.getElementById("confirmedStaff").textContent = `確定スタッフ：${nickname}`;
+            } else {
+              alert("送信に失敗しました。");
+            }
+          })
+          .catch(err => {
+            console.error("送信エラー:", err);
+            alert("送信に失敗しました。");
+          });
+
+        } else {
+          alert("スタッフを選択してください。");
+        }
+      });
+    }
   </script>
 </body>
 </html>
