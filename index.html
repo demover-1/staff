@@ -112,10 +112,10 @@
 
     const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
 
-    // ✅ 修正：Google Drive 共有リンクを埋め込み表示用リンクに変換
+    // ✅ 修正済み：Google Driveの埋め込み画像URL（lh3.googleusercontent形式）
     function convertDriveUrl(originalUrl) {
       const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
+      return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : "";
     }
 
     // スタッフ情報を取得してフォームに表示
