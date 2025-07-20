@@ -110,7 +110,7 @@
       alert("useridが指定されていません。URLを確認してください。");
     }
 
-    const webhookURL = "https://hook.us1.make.com/xxxxxx"; // スタッフ取得用Webhook URL
+    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg"; // スタッフ取得用Webhook URL
 
     // スタッフ情報を取得してHTMLに追加
     fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}`)
@@ -154,7 +154,7 @@
       if (selected && userid) {
         const nickname = selected.value;
 
-        const postWebhook = "https://hook.us1.make.com/yyyyyy"; // スタッフ決定通知用Webhook URL
+        const postWebhook = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg"; // スタッフ決定通知用Webhook URL
 
         fetch(postWebhook, {
           method: "POST",
