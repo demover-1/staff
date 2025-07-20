@@ -107,13 +107,13 @@
     const userid = urlParams.get("userid")?.toLowerCase();
     const kakutei = urlParams.get("kakutei");
 
-    console.log("kakutei:", kakutei); // ✅ 確認用ログ
+    console.log("kakutei:", kakutei); // 確認用ログ
 
     if (!userid) {
       alert("useridが指定されていません。URLを確認してください。");
     }
 
-    // ✅ kakuteiパラメータで分岐制御（任意）
+    // kakuteiパラメータで分岐制御（任意）
     if (kakutei !== "ssttff") {
       console.log("このページはスタッフ選択モードではありません。");
       return;
@@ -126,7 +126,7 @@
       return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
     }
 
-    fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}`)
+    fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}&kakutei=${encodeURIComponent(kakutei)}`)
       .then(res => res.json())
       .then(data => {
         const staffForm = document.getElementById("staffForm");
@@ -181,7 +181,8 @@
           },
           body: JSON.stringify({
             nickname: nickname,
-            userid: userid
+            userid: userid,
+            kakutei: kakutei  // ここに kakutei を追加
           })
         })
         .then(res => {
