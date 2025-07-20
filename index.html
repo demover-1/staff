@@ -100,41 +100,53 @@
 
   <button type="submit" form="staffForm">スタッフを決定する</button>
 
-  <div id="confirmedStaff"></div> <!-- 確定スタッフの表示エリア -->
+  <div id="confirmedStaff"></div>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const userid = urlParams.get("userid")?.toLowerCase(); // 小文字で取得
+    const userid = urlParams.get("userid")?.toLowerCase();
 
     if (!userid) {
       alert("useridが指定されていません。URLを確認してください。");
     }
 
-    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg"; // スタッフ取得用Webhook URL
+    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
 
-    // スタッフ情報を取得してHTMLに追加
+    // Drive共有URLを埋め込み表示用に変換
+    function convertDriveUrl(originalUrl) {
+      const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+      return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
+    }
+
+    // スタッフ情報を取得
     fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}`)
       .then(res => res.json())
       .then(data => {
         const staffForm = document.getElementById("staffForm");
 
-        data.staffs.forEach((staff) => {
+        data.forEach((staff) => {
+          const nickname = staff[2] || "";
+          const intro = staff[6] || "";
+          const imageType = staff[7] || "";
+          const skill = staff[8] || "";
+          const imageUrl = convertDriveUrl(staff[11] || "");
+
           const label = document.createElement("label");
           label.className = "staff-card";
 
           label.innerHTML = `
             <div class="radio-column">
-              <input type="radio" name="staff" value="${staff.nickname}" required>
+              <input type="radio" name="staff" value="${nickname}" required>
             </div>
             <div class="staff-info">
-              <img src="https://drive.google.com/uc?export=view&id=${staff.photoId}" class="staff-photo" alt="スタッフ写真">
-              <div class="nickname">${staff.ニックネーム}</div>
+              <img src="${imageUrl}" class="staff-photo" alt="スタッフ写真">
+              <div class="nickname">${nickname}</div>
               <div class="block-label">得意なイメージ</div>
-              <div>${staff.得意なイメージ}</div>
+              <div>${imageType}</div>
               <div class="block-label">得意な技術</div>
-              <div>${staff.得意な技術}</div>
+              <div>${skill}</div>
               <div class="block-label">紹介文</div>
-              <div class="introduction">${staff.紹介文}</div>
+              <div class="introduction">${intro}</div>
             </div>
           `;
 
@@ -146,7 +158,7 @@
         alert("スタッフ情報の取得に失敗しました。もう一度お試しください。");
       });
 
-    // 送信時の処理
+    // スタッフ決定時
     document.getElementById("staffForm").addEventListener("submit", function(event) {
       event.preventDefault();
 
@@ -154,7 +166,7 @@
       if (selected && userid) {
         const nickname = selected.value;
 
-        const postWebhook = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg"; // スタッフ決定通知用Webhook URL
+        const postWebhook = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
 
         fetch(postWebhook, {
           method: "POST",
