@@ -105,20 +105,27 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const userid = urlParams.get("userid")?.toLowerCase();
+    const kakutei = urlParams.get("kakutei");
+
+    console.log("kakutei:", kakutei); // ✅ 確認用ログ
 
     if (!userid) {
       alert("useridが指定されていません。URLを確認してください。");
     }
 
-    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
-
-    // ✅ 修正済み：Google Driveの埋め込み画像URL（lh3.googleusercontent形式）
-    function convertDriveUrl(originalUrl) {
-      const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : "";
+    // ✅ kakuteiパラメータで分岐制御（任意）
+    if (kakutei !== "ssttff") {
+      console.log("このページはスタッフ選択モードではありません。");
+      return;
     }
 
-    // スタッフ情報を取得してフォームに表示
+    const webhookURL = "https://hook.eu2.make.com/qqgf8srez9urb5j6cmx1qxn41v1st7tg";
+
+    function convertDriveUrl(originalUrl) {
+      const match = originalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : "";
+    }
+
     fetch(`${webhookURL}?userid=${encodeURIComponent(userid)}`)
       .then(res => res.json())
       .then(data => {
@@ -158,7 +165,6 @@
         alert("スタッフ情報の取得に失敗しました。もう一度お試しください。");
       });
 
-    // スタッフ決定時の処理
     document.getElementById("staffForm").addEventListener("submit", function(event) {
       event.preventDefault();
 
